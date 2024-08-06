@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reflex Agent</title>
+</head>
+<body>
+    <div id="log"></div>
+    <script>
+        // MIT License
+        // Copyright (c) 2020 Luis Espino
+
+        function reflex_agent(location, state) {
+            if (state == "DIRTY") return "CLEAN";
+            else if (location == "A") return "RIGHT";
+            else if (location == "B") return "LEFT";
+        }
+
+        function reflex_agent_dirty(location, state) {
+            if (state == "CLEAN") return "DIRTY";
+            else if (location == "A") return "RIGHT";
+            else if (location == "B") return "LEFT";
+        }
+
+        function test(states, initialState, isCleaning, rounds) {
+            var location = states[0];
+            var state = location == "A" ? states[1] : states[2];
+            var action_result;
+
+            if (isCleaning) {
+                action_result = reflex_agent(location, state);
+                document.getElementById("log").innerHTML += "<br>Cleaning Agent -> Location: ".concat(location).concat(" | Action: ").concat(action_result);
+            } else {
+                action_result = reflex_agent_dirty(location, state);
+                document.getElementById("log").innerHTML += "<br>Dirtying Agent -> Location: ".concat(location).concat(" | Action: ").concat(action_result);
+            }
+
+            if (action_result == "CLEAN") {
+                if (location == "A") states[1] = "CLEAN";
+                else if (location == "B") states[2] = "CLEAN";
+            } else if (action_result == "DIRTY") {
+                if (location == "A") states[1] = "DIRTY";
+                else if (location == "B") states[2] = "DIRTY";
+            } else if (action_result == "RIGHT") {
+                states[0] = "B";
+            } else if (action_result == "LEFT") {
+                states[0] = "A";
+            }
+
+            var allClean = states[1] == "CLEAN" && states[2] == "CLEAN";
+            var allDirty = states[1] == "DIRTY" && states[2] == "DIRTY";
+
+            if ((isCleaning && allClean) || (!isCleaning && allDirty)) {
+                if (rounds >= 1 && !isCleaning) {
+                    document.getElementById("log").innerHTML += "<br>Process completed.";
+                    return;
+                }
+
+                // Alternar entre limpiar y ensuciar
+                isCleaning = !isCleaning;
+
+                if (isCleaning) {
+                    rounds++;
+                    if (rounds == 1) {
+                        states[0] = "B"; // Cambiar la ubicación inicial a "B" para la segunda ronda de limpieza
+                    }
+                }
+
+                // Reiniciar los estados a los iniciales
+                states[1] = initialState[1];
+                states[2] = initialState[2];
+            }
+
+            setTimeout(function() { test(states, initialState, isCleaning, rounds); }, 2000);
+        }
+
+        var states = ["A", "DIRTY", "DIRTY"];
+        var initialState = states.slice(); // Guardar el estado inicial
+        test(states, initialState, true, 0); // Iniciar la prueba con limpieza habilitada
+    </script>
+</body>
+</html>
